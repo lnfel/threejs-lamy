@@ -11,8 +11,8 @@ scene.add(mesh)
 
 // Camera
 const sizes = {
-	width: document.documentElement.clientWidth,
-	height: document.documentElement.clientHeight,
+	width: 800,
+	height: 600,
 }
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height)
 camera.position.z = 3
@@ -27,4 +27,5 @@ const renderer = new THREE.WebGLRenderer({
 renderer.setSize(sizes.width, sizes.height)
 renderer.render(scene, camera)
 
+console.log(window.innerWidth, window.innerHeight)
 console.log(document.documentElement.clientWidth)
