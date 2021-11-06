@@ -12,8 +12,95 @@ const canvas = document.querySelector('canvas.webgl')
 const scene = new THREE.Scene()
 
 // Object
-const geometry = new THREE.BoxGeometry(1, 1, 1)
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+//const geometry = new THREE.BoxGeometry(1, 1, 1, 2, 2, 2)
+
+//-------------------------------------------
+// Create custom geometry by specifying vertices manually
+/*const geometry = new THREE.Geometry()
+
+const vertex1 = new THREE.Vector3(0, 0, 0)
+const vertex2 = new THREE.Vector3(0, 1, 0)
+const vertex3 = new THREE.Vector3(1, 0, 0)
+
+geometry.vertices.push(vertex1)
+geometry.vertices.push(vertex2)
+geometry.vertices.push(vertex3)*/
+
+// console.log(geometry.vertices)
+
+// to see the lines connect between vertices
+// create a new face3 with a value of geometry.vertices array keys
+// hence why we use 0, 1, and 2
+/*const face = new THREE.Face3(0, 1, 2)
+geometry.faces.push(face)*/
+//-------------------------------------------
+
+//-------------------------------------------
+// Generate a random geometry object
+//const geometry = new THREE.Geometry()
+
+// generate 50 instances of triangles
+// for each instance of triangle we make 3 vertices to make up the face of the triangle
+/*for(let i = 0; i < 50; i++) {
+    for(let j = 0; j < 3; j++) {
+        geometry.vertices.push(new THREE.Vector3(
+            (Math.random() - 0.5) * 4,
+            (Math.random() - 0.5) * 4,
+            (Math.random() - 0.5) * 4
+        ))
+    }
+    const verticesIndex = i * 3
+    geometry.faces.push(new THREE.Face3(
+        verticesIndex,
+        verticesIndex + 1,
+        verticesIndex + 2
+    ))
+}*/
+//-------------------------------------------
+
+//-------------------------------------------
+// Sample Buffer Geometry using cube
+//const geometry = new THREE.BoxBufferGeometry(1, 1, 1, 2, 2, 2)
+//-------------------------------------------
+
+//-------------------------------------------
+// Custom geometry using buffer geometry
+/*const positionArray = new Float32Array([
+    0, 0, 0, // first vertice
+    0, 1, 0, // second vertice
+    1, 0, 0, // third vertice
+])*/
+//console.log(positionArray)
+
+// convert positionArray into threejs buffer attribute
+// that accepts a float32array and an integer that corresponds to how
+// many values copose one vertex
+// THREE.BufferAttribute(float32array, integer)
+/*const positionAttribute = new THREE.BufferAttribute(positionArray, 3)
+
+const geometry = new THREE.BufferGeometry()
+geometry.setAttribute('position', positionAttribute)*/
+//-------------------------------------------
+
+//-------------------------------------------
+// Generate random buffer geometry object
+const geometry = new THREE.BufferGeometry()
+const count = 500
+const positionArray = new Float32Array(count * 3 * 3)
+
+for(let i =0; i < count * 3 * 3; i++) {
+    positionArray[i] = (Math.random() - 0.5) * 4
+}
+
+const positionAttribute = new THREE.BufferAttribute(positionArray, 3)
+geometry.setAttribute('position', positionAttribute)
+//-------------------------------------------
+
+const material = new THREE.MeshBasicMaterial({
+    color: 0xff0000,
+    // show the triangles
+    wireframe: true
+})
 const mesh = new THREE.Mesh(geometry, material)
 scene.add(mesh)
 
