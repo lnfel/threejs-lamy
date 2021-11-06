@@ -23,9 +23,52 @@ scene.add(mesh)
  * Sizes
  */
 const sizes = {
-    width: 800,
-    height: 600
+    width: window.innerWidth,
+    height: window.innerHeight
 }
+
+window.addEventListener('resize', (event) => {
+    // Update sizes on window resize
+    sizes.width = window.innerWidth
+    sizes.height = window.innerHeight
+    //console.log('Window has been resized!')
+
+    // Update the camera aspect ratio as well
+    camera.aspect = sizes.width / sizes.height
+    camera.updateProjectionMatrix()
+
+    // Update renderer size as well
+    renderer.setSize(sizes.width, sizes.height)
+
+    // Set pixel ratio to be used, limit to 2 pixel ratio
+    // pixel ratio is updated on resize to handle users that have dual monitors
+    // with different device pixel ratio
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+})
+
+window.addEventListener('dblclick', (event) => {
+    // handle old safari using webkit prefix
+    const fullscreenElement = document.fullscreenElement || document.webkitFullscreenElement
+
+    //if (!document.fullscreenElement) {
+    if (!fullscreenElement) {
+        // go fullscreen if canvas.requestFullscreen or the webkit
+        // counterpart feature exists
+        if (canvas.requestFullscreen) {
+            canvas.requestFullscreen()
+        } else if (canvas.webkitRequestFullscreen) {
+            canvas.webkitRequestFullscreen()
+        }
+    } else {
+        // exit fullscreen
+        if (document.exitFullscreen) {
+            document.exitFullscreen()
+        } else if (document.webkitExitFullscreen) {
+            document.webkitRequestFullscreen()
+        }
+    }
+    //console.log('Double clicked!')
+})
 
 /**
  * Camera
