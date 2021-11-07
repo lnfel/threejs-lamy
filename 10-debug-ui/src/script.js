@@ -23,8 +23,7 @@ const parameters = {
     color: 0xff0000,
     spin: () => {
         gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 2 })
-    },
-}
+    },}
 
 /**
  * Base

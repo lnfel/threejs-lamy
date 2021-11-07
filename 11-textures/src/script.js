@@ -3,6 +3,84 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 /**
+ * Textures
+ */
+ // Loading texture using native javascript
+/*const image = new Image()
+const texture = new THREE.Texture(image)
+
+image.onload = () => {
+    texture.needsUpdate = true
+    console.log(texture)
+    //console.log('Image loaded')
+}
+image.src = '/textures/door/color.jpg'*/
+
+// Loading texture using threejs texture loader
+// sample texture loading with callbacks
+// const textureLoader = new THREE.TextureLoader()
+// const texture = textureLoader.load(
+//     '/textures/door/color.jpg',
+//     () => {
+//         // load
+//     },
+//     () => {
+//         // progress
+//     },
+//     () => {
+//         // error
+//     },
+// )
+
+// Using loading manager
+const loadingManager = new THREE.LoadingManager()
+loadingManager.onStart = () => {
+    console.log('started')
+}
+
+loadingManager.onLoaded = () => {
+    console.log('loaded')
+}
+
+loadingManager.onProgress = () => {
+    console.log('progress')
+}
+
+loadingManager.onError = () => {
+    console.log('error')
+}
+
+const textureLoader = new THREE.TextureLoader(loadingManager)
+const colorTexture = textureLoader.load('/textures/door/color.jpg')
+const alphaTexture = textureLoader.load('/textures/door/alpha.jpg')
+const heightTexture = textureLoader.load('/textures/door/height.jpg')
+const normalTexture = textureLoader.load('/textures/door/normal.jpg')
+const ambientOcclusionTexture = textureLoader.load('/textures/door/ambientOcclusion.jpg')
+const metalnessTexture = textureLoader.load('/textures/door/metalness.jpg')
+const roughnessTexture = textureLoader.load('/textures/door/roughness.jpg')
+
+// colorTexture.repeat.x = 2
+// colorTexture.repeat.y = 3
+// colorTexture.wrapS = THREE.RepeatWrapping
+// colorTexture.wrapT = THREE.RepeatWrapping
+/*colorTexture.wrapS = THREE.MirroredRepeatWrapping
+colorTexture.wrapT = THREE.MirroredRepeatWrapping*/
+
+// colorTexture.offset.x = 0.5
+// colorTexture.offset.y = 0.5
+
+/*colorTexture.rotation = Math.PI * 0.25*/
+// adjust pivot point to center
+/*colorTexture.center.x = 0.5
+colorTexture.center.y = 0.5*/
+
+// disable mipmaps if we are using THREE.NearestFilter on minFilter
+// this is much better on GPU
+colorTexture.generateMipmaps = false
+colorTexture.minFilter = THREE.NearestFilter
+colorTexture.magFilter = THREE.NearestFilter
+
+/**
  * Base
  */
 // Canvas
@@ -15,7 +93,9 @@ const scene = new THREE.Scene()
  * Object
  */
 const geometry = new THREE.BoxBufferGeometry(1, 1, 1)
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+// UV coordinates
+console.log(geometry.attributes.uv)
+const material = new THREE.MeshBasicMaterial({ map: colorTexture })
 const mesh = new THREE.Mesh(geometry, material)
 scene.add(mesh)
 
