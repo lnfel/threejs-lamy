@@ -2,6 +2,29 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import gsap from 'gsap'
+import * as dat from 'dat.gui'
+
+/**
+ * Debug
+ */
+const gui = new dat.GUI()
+
+// if we want to have dat.gui controls collapsed on initialize
+// const gui = new dat.GUI({ closed: true })
+
+// we can also set initial width i.e.
+// const gui = new dat.GUI({ closed: true, width: 400 })
+
+// hide dat.gui on initialize
+// pressing H toggles dat.gui visibility
+//gui.hide()
+
+const parameters = {
+    color: 0xff0000,
+    spin: () => {
+        gsap.to(mesh.rotation, { duration: 1, y: mesh.rotation.y + Math.PI * 2 })
+    },
+}
 
 /**
  * Base
@@ -16,9 +39,33 @@ const scene = new THREE.Scene()
  * Object
  */
 const geometry = new THREE.BoxBufferGeometry(1, 1, 1)
-const material = new THREE.MeshBasicMaterial({ color: 0xff0000 })
+const material = new THREE.MeshBasicMaterial({ color: parameters.color })
 const mesh = new THREE.Mesh(geometry, material)
 scene.add(mesh)
+
+// Add debug for mesh
+
+// Range
+// @params object, object property, ineteger, integer, float
+// gui.add(object, property, min, max, precision)
+// min, max and precision can also be chained
+// gui.add(mesh.position, 'x').min(-3).max(3).step(0.01)
+gui.add(mesh.position, 'x', -3, 3, 0.01)
+gui.add(mesh.position, 'y', -3, 3, 0.01).name('Elevation')
+gui.add(mesh.position, 'z', -3, 3, 0.01)
+
+// Boolean
+gui.add(mesh, 'visible').name('Visible')
+// mesh.material or simply material, both works
+gui.add(mesh.material, 'wireframe').name('Enable wireframe')
+
+// Colors
+gui.addColor(parameters, 'color').onChange(() => {
+    material.color.set(parameters.color)
+})
+
+// Trigger function
+gui.add(parameters, 'spin')
 
 /**
  * Sizes
