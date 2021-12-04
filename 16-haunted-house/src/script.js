@@ -2,6 +2,7 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 
 /**
  * Base
@@ -14,6 +15,67 @@ const canvas = document.querySelector('canvas.webgl')
 
 // Scene
 const scene = new THREE.Scene()
+
+/**
+ * GLTF
+ * 
+ * https://sketchfab.com/3d-models/grave-b3de8d38f8444ec6b6170cb235e4594f
+ * https://github.com/pmndrs/react-three-fiber/issues/245#issuecomment-554612085
+ * https://github.com/pmndrs/react-three-fiber/issues/245#issuecomment-578438517
+ */
+const gltfLoader = new GLTFLoader();
+
+gltfLoader.load('textures/haunted-house/haunted_house.gltf', function(gltf) {
+    gltf.scene.scale.set(0.5, 0.5, 0.5)
+    gltf.scene.position.set(0, 5.5, 0)
+    gltf.scene.traverse( function( node ) {
+        if ( node.isMesh ) {
+            node.castShadow = true
+            node.receiveShadow = true
+        }
+    })
+    scene.add(gltf.scene)
+}, undefined, function ( error ) {
+    console.error( error )
+})
+
+gltfLoader.load('textures/grave/grave.gltf', function(gltf) {
+    // reduce scale since model is to big for our scene
+    gltf.scene.scale.set(0.3, 0.3, 0.3)
+    // cast gltf shadow
+    // https://stackoverflow.com/a/49869883
+    gltf.scene.traverse( function( node ) {
+        if ( node.isMesh ) { node.castShadow = true }
+    })
+    
+    for (let i = 0; i < 50; i++) {
+        const graveGLTFAngle = Math.random() * Math.PI * 2                          // Random angle
+        const graveGLTFRadius = 3 + Math.random() * 6                               // Random radius
+        const graveGLTFX = Math.sin(graveGLTFAngle) * graveGLTFRadius               // Get the x position using sinus
+        const graveGLTFY = getRandomYAxis(- 0.3, - 0.1)                             // Random y position of a grave
+        const graveGLTFZ = Math.cos(graveGLTFAngle) * graveGLTFRadius               // Get the z position using cosinus
+
+        // create the grave mesh
+        const graveGLTFScene = gltf.scene.clone(true)                               // so we can instantiate multiple copies of this geometry
+
+        // Position
+        graveGLTFScene.position.set(graveGLTFX, graveGLTFY, graveGLTFZ)
+
+        // Ratation
+        graveGLTFScene.rotation.z = (Math.random() - 0.5) * 0.4
+        graveGLTFScene.rotation.y = (Math.random() - 0.5) * 0.4
+
+        graveGLTFScene.castShadow = true
+        scene.add(graveGLTFScene)
+    }
+
+    // for testing
+    //gltf.scene.position.set(2, 2, 0)
+    //scene.add( gltf.scene )
+    //console.log(gltf)
+}, undefined, function ( error ) {
+    console.error( error )
+})
 
 // Fog
 //const fog = new THREE.Fog('#ff0000', 2, 6)
@@ -42,6 +104,10 @@ const grassAmbientOcclusionTexture = textureLoader.load('textures/grass/ambientO
 const grassNormalTexture = textureLoader.load('textures/grass/normal.jpg')
 const grassRoughnessTexture = textureLoader.load('textures/grass/roughness.jpg')
 
+const graveColorTexture = textureLoader.load('textures/grave/color.jpeg')
+const graveMetallicRoughnessTexture = textureLoader.load('textures/grave/metallic_roughness.png')
+const graveNormalTexture = textureLoader.load('textures/grave/normal.png')
+
 grassColorTexture.repeat.set(8, 8)
 grassAmbientOcclusionTexture.repeat.set(8, 8)
 grassNormalTexture.repeat.set(8, 8)
@@ -61,7 +127,7 @@ grassRoughnessTexture.wrapT = THREE.RepeatWrapping
  * House
  */
 const house = new THREE.Group()
-scene.add(house)
+//scene.add(house)
 
 // Walls
 const walls = new THREE.Mesh(
@@ -143,31 +209,39 @@ const graves = new THREE.Group()
 scene.add(graves)
 
 const graveGeometry = new THREE.BoxBufferGeometry(0.6, 0.8, 0.2)
-const graveMaterial = new THREE.MeshStandardMaterial({ color: '#b2b6b1' })
+//const graveGeometry = new THREE.PlaneBufferGeometry(0.6, 0.8, 100, 100)
+const graveMaterial = new THREE.MeshStandardMaterial({
+    color: '#b2b6b1',
+    // map: grassColorTexture,
+    // transparent: true,
+    // normalMap: graveNormalTexture,
+    // metalnessMap: graveMetallicRoughnessTexture,
+    // roughnessMap: graveMetallicRoughnessTexture,
+})
 
 function getRandomYAxis(min, max) {
     return Math.random() * (max - min) + min
 }
 
 for (let i = 0; i < 50; i++) {
-    const angle = Math.random() * Math.PI * 2   // Random angle
-    const radius = 3 + Math.random() * 6        // Random radius
-    const x = Math.sin(angle) * radius          // Get the x position using sinus
-    const y = getRandomYAxis(- 0.1, 0.3)        // Random y position of a grave
-    const z = Math.cos(angle) * radius          // Get the z position using cosinus
+        const angle = Math.random() * Math.PI * 2   // Random angle
+        const radius = 3 + Math.random() * 6        // Random radius
+        const x = Math.sin(angle) * radius          // Get the x position using sinus
+        const y = getRandomYAxis(- 0.1, 0.3)        // Random y position of a grave
+        const z = Math.cos(angle) * radius          // Get the z position using cosinus
 
-    // create the grave mesh
-    const grave = new THREE.Mesh(graveGeometry, graveMaterial)
+        // create the grave mesh
+        const grave = new THREE.Mesh(graveGeometry, graveMaterial)
 
-    // Position
-    grave.position.set(x, y, z)
+        // Position
+        grave.position.set(x, y, z)
 
-    // Ratation
-    grave.rotation.z = (Math.random() - 0.5) * 0.4
-    grave.rotation.y = (Math.random() - 0.5) * 0.4
+        // Ratation
+        grave.rotation.z = (Math.random() - 0.5) * 0.4
+        grave.rotation.y = (Math.random() - 0.5) * 0.4
 
-    grave.castShadow = true
-    graves.add(grave)
+        grave.castShadow = true
+        //graves.add(grave)
 }
 
 // Temporary sphere
@@ -196,19 +270,19 @@ floor.geometry.setAttribute(
 )
 floor.rotation.x = - Math.PI * 0.5
 floor.position.y = 0
-scene.add(floor)
+//scene.add(floor)
 
 /**
  * Lights
  */
 // Ambient light
-const ambientLight = new THREE.AmbientLight('#b9d5ff', 0.12)
+const ambientLight = new THREE.AmbientLight('#b9d5ff', 0.5)// 0.12
 const ambientLightGUI = gui.addFolder('Ambient Light')
 ambientLightGUI.add(ambientLight, 'intensity').min(0).max(1).step(0.001)
 scene.add(ambientLight)
 
 // Directional light
-const moonLight = new THREE.DirectionalLight('#b9d5ff', 0.12)
+const moonLight = new THREE.DirectionalLight('#b9d5ff', 0.5)// 0.12
 moonLight.position.set(4, 5, - 2)
 const directionalLightGUI = gui.addFolder('Directional Light')
 directionalLightGUI.add(moonLight, 'intensity').min(0).max(1).step(0.001)
@@ -260,7 +334,7 @@ window.addEventListener('resize', () =>
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
 camera.position.x = 4
 camera.position.y = 2
-camera.position.z = 5
+camera.position.z = 10 // 5
 scene.add(camera)
 
 // Controls
