@@ -79,7 +79,7 @@ gltfLoader.load('textures/grave/grave.gltf', function(gltf) {
 
 // Fog
 //const fog = new THREE.Fog('#ff0000', 2, 6)
-const fog = new THREE.Fog('#262837', 1, 15)
+const fog = new THREE.Fog('#262837', 1, 30)
 scene.fog = fog
 
 /**
