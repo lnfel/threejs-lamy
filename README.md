@@ -42,13 +42,13 @@ git branch -v -a
   - Switch to template branch
     ```sh
     git checkout template
-    ## or
+    # or
     git switch template
     ```
   - Create a new branch from template and switch to it
     ```sh
     git checkout -b your-custom-branch template
-    ## or
+    # or
     git switch --create your-custom-branch template
     ```
 
@@ -74,7 +74,7 @@ or if you have created your own branch
 ```
 
 This one command will only list the branch you are on:
-```
+```sh
 git branch --show-current
 ```
 
