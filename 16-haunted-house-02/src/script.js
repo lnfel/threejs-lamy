@@ -3,12 +3,33 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import * as dat from 'dat.gui'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+// Post processing
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { ShaderPass } from 'three/examples/jsm/postprocessing/ShaderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 
 /**
  * Base
  */
 // Debug
 const gui = new dat.GUI()
+
+// Constants
+const ENTIRE_SCENE = 0, BLOOM_SCENE = 1
+
+// Parameters
+const parameters = {
+    exposure: 1,
+    bloomStrength: 1.5,
+    bloomThreshold: 0,
+    bloomRadius: 0,
+    scene: 'Scene with Glow'
+}
+
+// Bloom layer
+const bloomLayer = new THREE.Layers();
+bloomLayer.set( BLOOM_SCENE );
 
 // Canvas
 const canvas = document.querySelector('canvas.webgl')
@@ -19,21 +40,100 @@ const scene = new THREE.Scene()
 /**
  * GLTF
  * 
+ * Grave
  * https://sketchfab.com/3d-models/grave-b3de8d38f8444ec6b6170cb235e4594f
+ * 
+ * Haunted House
+ * https://sketchfab.com/3d-models/haunted-house-c363402560a14535912508b72f2f6535
+ * 
  * https://github.com/pmndrs/react-three-fiber/issues/245#issuecomment-554612085
  * https://github.com/pmndrs/react-three-fiber/issues/245#issuecomment-578438517
  */
 const gltfLoader = new GLTFLoader();
 
 gltfLoader.load('textures/haunted-house/haunted_house.gltf', function(gltf) {
-    gltf.scene.scale.set(0.5, 0.5, 0.5)
-    gltf.scene.position.set(0, 5.5, 0)
+    gltf.scene.scale.set(0.2, 0.2, 0.2)
+    gltf.scene.position.set(0, 2.2, 0)
     gltf.scene.traverse( function( node ) {
+        // make all nodes in gltf scene receive shadow
         if ( node.isMesh ) {
-            node.castShadow = true
             node.receiveShadow = true
+            // console.log(node);
+        }
+
+        // objects to enable casting shadow
+        const objectWithShadows = [
+            'Plane000_0',
+            'Plane000_1',
+            // 'Plane013_0',    // House group, bad idea, we just want some part of house to cat shadow
+            'Plane000_3',       // Roof
+            'Plane000_5',       // Wooden sign
+            'Plane000_7',       // Wooden Door and chain
+            'Plane',            // Tree
+            'Plane001_0',       // Tree
+            'Plane002_0',       // Tree
+            'Plane005_0',       // Tree
+            'Plane010_0',       // Tree
+            'Plane012_0',       // Tree
+            'Plane014_0',       // Tree
+            'Plane015_0',       // Tree
+            'Plane016_0',       // Tree
+            'Plane017_0',       // Tree
+            'Plane018_0',       // Tree
+            'Plane019_0',       // Tree
+            'Circle002_0',      // Lamp posts
+            'Circle004_1',      // Barrels
+            'Cylinder000_0',    // Fence
+            'Cylinder001_0',    // Fence
+            'Cylinder002_0',    // Shovel
+            'Cylinder006_0',    // Shovel
+            'Cylinder004_0',    // Shovel
+            'Cylinder004_1',    // Shovel
+            'Cylinder003_0',    // Crop
+            'Cylinder003_1',    // Crop
+            'Cylinder005_0',    // Crop
+            'Cylinder005_1',    // Crop
+            'BezierCurve_0',    // Cart part
+            'BezierCurve_1',    // Cart part
+            'Plane008_1',       // Grass
+            'Plane008_1001',    // Grass
+            'Plane008_1002',    // Grass
+            'Plane008_1003',    // Grass
+            'Plane008_1004',    // Grass
+            'Plane003_0',       // Clouds
+            'Plane006_0',       // Clouds
+            'Plane007_0',       // Clouds
+            'Plane011_0',       // Clouds
+            //'Plane000_4',       // Windows
+        ]
+
+        if (objectWithShadows.some((name) => name == node.name)) {
+            node.castShadow = true
+            // console.log(node);
+        }
+
+        // Remove all mists
+        if (node.name.includes('mist')) {
+            node.visible = false
+        }
+
+        // TODO: find a way to make object glow
+        // for now we use unrealbloompass
+        // https://www.8thwall.com/playground/postprocessing-bloom
+        // https://github.com/mrdoob/three.js/blob/master/examples/webgl_postprocessing_unreal_bloom.html
+        const glowingObjects = [
+            'Plane000_4', // Windows
+            'Circle001_3', // Lamps
+        ]
+
+        // Glowing windows
+        if (glowingObjects.some((name) => name == node.name)) {
+            // Learn this
+            // https://threejs.org/examples/#webgl_postprocessing_unreal_bloom_selective
+            // https://github.com/mrdoob/three.js/blob/master/examples/webgl_postprocessing_unreal_bloom_selective.html
         }
     })
+
     scene.add(gltf.scene)
 }, undefined, function ( error ) {
     console.error( error )
@@ -48,9 +148,9 @@ gltfLoader.load('textures/grave/grave.gltf', function(gltf) {
         if ( node.isMesh ) { node.castShadow = true }
     })
     
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 20; i++) {
         const graveGLTFAngle = Math.random() * Math.PI * 2                          // Random angle
-        const graveGLTFRadius = 3 + Math.random() * 6                               // Random radius
+        const graveGLTFRadius = 3 + Math.random() * 2                               // Random radius
         const graveGLTFX = Math.sin(graveGLTFAngle) * graveGLTFRadius               // Get the x position using sinus
         const graveGLTFY = getRandomYAxis(- 0.3, - 0.1)                             // Random y position of a grave
         const graveGLTFZ = Math.cos(graveGLTFAngle) * graveGLTFRadius               // Get the z position using cosinus
@@ -276,20 +376,23 @@ floor.position.y = 0
  * Lights
  */
 // Ambient light
-const ambientLight = new THREE.AmbientLight('#b9d5ff', 0.5)// 0.12
-const ambientLightGUI = gui.addFolder('Ambient Light')
-ambientLightGUI.add(ambientLight, 'intensity').min(0).max(1).step(0.001)
+const ambientLight = new THREE.AmbientLight('#b9d5ff', 0.3)// 0.12
 scene.add(ambientLight)
 
 // Directional light
 const moonLight = new THREE.DirectionalLight('#b9d5ff', 0.5)// 0.12
-moonLight.position.set(4, 5, - 2)
-const directionalLightGUI = gui.addFolder('Directional Light')
-directionalLightGUI.add(moonLight, 'intensity').min(0).max(1).step(0.001)
-directionalLightGUI.add(moonLight.position, 'x').min(- 5).max(5).step(0.001)
-directionalLightGUI.add(moonLight.position, 'y').min(- 5).max(5).step(0.001)
-directionalLightGUI.add(moonLight.position, 'z').min(- 5).max(5).step(0.001)
+// moonLight.position.set(7, 4, -5)
+moonLight.position.set(7, 7, -1.5)
+const moonLightTarget = new THREE.Object3D()
+moonLightTarget.position.set(0,0,0)
+moonLight.target = moonLightTarget
 scene.add(moonLight)
+scene.add(moonLightTarget)
+scene.add(moonLight.target)
+
+const moonLightHelper = new THREE.DirectionalLightHelper(moonLight, 0.2)
+moonLightHelper.visible = false
+scene.add(moonLightHelper)
 
 // Door Light
 const doorLight = new THREE.PointLight('#ff7d46', 1, 7)
@@ -302,7 +405,7 @@ house.add(doorLight)
 const ghost1 = new THREE.PointLight('#ff00ff', 2, 3)
 const ghost2 = new THREE.PointLight('#00ffff', 2, 3)
 const ghost3 = new THREE.PointLight('#ffff00', 2, 3)
-scene.add(ghost1, ghost2, ghost3)
+// scene.add(ghost1, ghost2, ghost3)
 
 /**
  * Sizes
@@ -332,9 +435,9 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.x = 4
-camera.position.y = 2
-camera.position.z = 10 // 5
+camera.position.x = 1
+camera.position.y = 3
+camera.position.z = 6
 scene.add(camera)
 
 // Controls
@@ -345,17 +448,43 @@ controls.enableDamping = true
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+    canvas: canvas,
+    // alpha: true,
+    antialias: true
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.setClearColor('#262837')
 
 /**
+ * RenderPass
+ */
+const renderScene = new RenderPass(scene, camera)
+
+/**
+ * BloomPass
+ */
+const bloomPass = new UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 )
+bloomPass.threshold = parameters.bloomThreshold
+bloomPass.strength = parameters.bloomStrength
+bloomPass.radius = parameters.bloomRadius
+
+/**
+ * EffectComposer
+ */
+const composer = new EffectComposer(renderer)
+// composer.renderToScreen = false
+composer.addPass(renderScene)
+composer.addPass(bloomPass)
+
+/**
  * Shadows
  */
 renderer.shadowMap.enabled = true
-renderer.shadowMap.type = THREE.PCFSoftShadowMap
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+// renderer.shadowMap.type = THREE.PCFSoftShadowMap
+renderer.shadowMap.type = true
+renderer.toneMappingExposure = 1
 
 moonLight.castShadow = true
 doorLight.castShadow = true
@@ -393,6 +522,39 @@ ghost3.shadow.mapSize.height = 256
 ghost3.shadow.camera.far = 7
 
 /**
+ * GUI
+ */
+// Fog
+const fogGUI = gui.addFolder('Fog')
+fogGUI.add(fog, 'far').min(0).max(100).step(10)
+// Ambient Light
+const ambientLightGUI = gui.addFolder('Ambient Light')
+ambientLightGUI.add(ambientLight, 'intensity').min(0).max(1).step(0.001)
+// Moon Light
+const directionalLightGUI = gui.addFolder('Directional Light')
+// directionalLightGUI.addColor(moonLight, 'color')
+directionalLightGUI.add(moonLight, 'intensity').min(0).max(1).step(0.001)
+directionalLightGUI.add(moonLight.position, 'x').min(-10).max(10).step(0.001)
+directionalLightGUI.add(moonLight.position, 'y').min(-10).max(20).step(0.001)
+directionalLightGUI.add(moonLight.position, 'z').min(-10).max(10).step(0.001)
+directionalLightGUI.add(moonLight, 'visible').name('Moon light')
+directionalLightGUI.add(moonLightHelper, 'visible').name('Helper')
+// Bloom
+const bloomGUI = gui.addFolder('Bloom')
+bloomGUI.add(parameters, 'exposure').min(0.1).max(2).onChange(function (value) {
+    renderer.toneMappingExposure = Math.pow(value, 4.0)
+})
+bloomGUI.add(parameters, 'bloomThreshold').min(0.0).max(1).step(0.01).onChange(function (value) {
+    bloomPass.threshold = Number(value)
+})
+bloomGUI.add(parameters, 'bloomStrength').min(0.0).max(3).onChange(function (value) {
+    bloomPass.strength = Number(value)
+})
+bloomGUI.add(parameters, 'bloomRadius').min(0.0).max(1).step(0.01).onChange(function (value) {
+    bloomPass.radius = Number(value)
+})
+
+/**
  * Animate
  */
 const clock = new THREE.Clock()
@@ -421,7 +583,8 @@ const tick = () =>
     controls.update()
 
     // Render
-    renderer.render(scene, camera)
+    // renderer.render(scene, camera)
+    composer.render()
 
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
