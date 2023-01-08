@@ -56,7 +56,23 @@ gltfLoader.load('textures/haunted-house/haunted_house.gltf', function(gltf) {
     gltf.scene.position.set(0, 2.2, 0)
     gltf.scene.traverse( function( node ) {
         // make all nodes in gltf scene receive shadow
-        if ( node.isMesh ) {
+        // except trees
+        const trees = [
+            'Plane',            // Tree
+            'Plane001_0',       // Tree
+            'Plane002_0',       // Tree
+            'Plane005_0',       // Tree
+            'Plane010_0',       // Tree
+            'Plane012_0',       // Tree
+            'Plane014_0',       // Tree
+            'Plane015_0',       // Tree
+            'Plane016_0',       // Tree
+            'Plane017_0',       // Tree
+            'Plane018_0',       // Tree
+            'Plane019_0',       // Tree
+        ]
+
+        if ( node.isMesh && !trees.includes(node.name) ) {
             node.receiveShadow = true
             // console.log(node);
         }
