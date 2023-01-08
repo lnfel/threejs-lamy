@@ -145,7 +145,11 @@ gltfLoader.load('textures/grave/grave.gltf', function(gltf) {
     // cast gltf shadow
     // https://stackoverflow.com/a/49869883
     gltf.scene.traverse( function( node ) {
-        if ( node.isMesh ) { node.castShadow = true }
+        if ( node.isMesh ) { 
+            node.castShadow = true
+            // receive shadow on grave asset is bad idea
+            // node.receiveShadow = true
+        }
     })
     
     for (let i = 0; i < 20; i++) {
