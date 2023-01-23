@@ -6305,19 +6305,6 @@
     "materials" : [
         {
             "doubleSided" : true,
-            "name" : "Outline",
-            "pbrMetallicRoughness" : {
-                "baseColorFactor" : [
-                    0.04201560094952583,
-                    0.024954499676823616,
-                    0.023454299196600914,
-                    1
-                ],
-                "metallicFactor" : 0
-            }
-        },
-        {
-            "doubleSided" : true,
             "name" : "Clothes2",
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
@@ -6353,19 +6340,6 @@
             "doubleSided" : true,
             "name" : "Outline_Hair",
             "pbrMetallicRoughness" : {
-                "baseColorFactor" : [
-                    0.5596209764480591,
-                    0.3399119973182678,
-                    0.2717429995536804,
-                    1
-                ],
-                "metallicFactor" : 0
-            }
-        },
-        {
-            "doubleSided" : true,
-            "name" : "Hair",
-            "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
                     "index" : 3
                 },
@@ -6375,7 +6349,7 @@
         },
         {
             "doubleSided" : true,
-            "name" : "gun",
+            "name" : "Hair",
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
                     "index" : 4
@@ -6386,7 +6360,7 @@
         },
         {
             "doubleSided" : true,
-            "name" : "Effect",
+            "name" : "gun",
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
                     "index" : 5
@@ -6408,10 +6382,21 @@
         },
         {
             "doubleSided" : true,
-            "name" : "BodyAll",
+            "name" : "Effect",
             "pbrMetallicRoughness" : {
                 "baseColorTexture" : {
                     "index" : 7
+                },
+                "metallicFactor" : 0,
+                "roughnessFactor" : 0.8040408492088318
+            }
+        },
+        {
+            "doubleSided" : true,
+            "name" : "BodyAll",
+            "pbrMetallicRoughness" : {
+                "baseColorTexture" : {
+                    "index" : 8
                 },
                 "metallicFactor" : 0,
                 "roughnessFactor" : 0.8040408492088318
@@ -6445,7 +6430,7 @@
                         "COLOR_0" : 8
                     },
                     "indices" : 9,
-                    "material" : 1
+                    "material" : 0
                 }
             ]
         },
@@ -6460,7 +6445,7 @@
                         "COLOR_0" : 13
                     },
                     "indices" : 14,
-                    "material" : 0
+                    "material" : 1
                 }
             ]
         },
@@ -6475,7 +6460,7 @@
                         "COLOR_0" : 18
                     },
                     "indices" : 19,
-                    "material" : 2
+                    "material" : 1
                 }
             ]
         },
@@ -6490,7 +6475,7 @@
                         "COLOR_0" : 23
                     },
                     "indices" : 24,
-                    "material" : 0
+                    "material" : 2
                 }
             ]
         },
@@ -6505,7 +6490,7 @@
                         "COLOR_0" : 28
                     },
                     "indices" : 29,
-                    "material" : 3
+                    "material" : 2
                 }
             ]
         },
@@ -6520,7 +6505,7 @@
                         "COLOR_0" : 33
                     },
                     "indices" : 34,
-                    "material" : 4
+                    "material" : 3
                 }
             ]
         },
@@ -6535,7 +6520,7 @@
                         "COLOR_0" : 38
                     },
                     "indices" : 39,
-                    "material" : 5
+                    "material" : 4
                 }
             ]
         },
@@ -6550,7 +6535,7 @@
                         "COLOR_0" : 43
                     },
                     "indices" : 44,
-                    "material" : 0
+                    "material" : 5
                 }
             ]
         },
@@ -6565,7 +6550,7 @@
                         "COLOR_0" : 48
                     },
                     "indices" : 49,
-                    "material" : 6
+                    "material" : 5
                 }
             ]
         },
@@ -6580,7 +6565,7 @@
                         "COLOR_0" : 53
                     },
                     "indices" : 54,
-                    "material" : 0
+                    "material" : 6
                 }
             ]
         },
@@ -6610,7 +6595,7 @@
                         "COLOR_0" : 63
                     },
                     "indices" : 64,
-                    "material" : 8
+                    "material" : 6
                 }
             ]
         },
@@ -6625,7 +6610,7 @@
                         "COLOR_0" : 68
                     },
                     "indices" : 69,
-                    "material" : 0
+                    "material" : 8
                 }
             ]
         },
@@ -6640,7 +6625,7 @@
                         "COLOR_0" : 73
                     },
                     "indices" : 74,
-                    "material" : 9
+                    "material" : 8
                 }
             ]
         }
@@ -6657,6 +6642,10 @@
         {
             "sampler" : 0,
             "source" : 2
+        },
+        {
+            "sampler" : 0,
+            "source" : 3
         },
         {
             "sampler" : 0,
@@ -6707,13 +6696,13 @@
         },
         {
             "mimeType" : "image/png",
-            "name" : "Effect",
-            "uri" : "Effect.png"
+            "name" : "body_col",
+            "uri" : "body_col.png"
         },
         {
             "mimeType" : "image/png",
-            "name" : "body_col",
-            "uri" : "body_col.png"
+            "name" : "Effect",
+            "uri" : "Effect.png"
         },
         {
             "mimeType" : "image/png",
