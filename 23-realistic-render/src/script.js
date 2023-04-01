@@ -8,6 +8,9 @@ import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js"
  * https://donmccurdy.com/2020/06/17/color-management-in-threejs
  * 
  * Continue at 00:40:51
+ * 
+ * All textures that we can see directly like map should have THREE.sRGBEncoding
+ * and all other textures such as normalMap should have THREE.LinearEncoding
  */
 
 /**
@@ -39,6 +42,11 @@ const updateAllMaterials = () => {
             // console.log(child)
             // child.material.envMap = environmentMap
             child.material.envMapIntensity = debugObject.envMapIntensity
+            // When updating toneMapping we need to specify needsUpdate to our model
+            // to update them as well
+            child.material.needsUpdate = true
+            child.castShadow = true
+            child.receiveShadow = true
         }
     })
 }
@@ -63,7 +71,7 @@ const environmentMap = cubeTexttureLoader.load([
     '/textures/environmentMaps/1/pz.jpg',
     '/textures/environmentMaps/1/nz.jpg',
 ])
-
+environmentMap.encoding = THREE.sRGBEncoding
 scene.background = environmentMap
 scene.environment = environmentMap
 debugObject.envMapIntensity = 5
@@ -88,12 +96,34 @@ gltfLoader.load(
     }
 )
 
+gltfLoader.load(
+    '/models/hamburger.glb',
+    (gltf) => {
+        gltf.scene.scale.set(0.3, 0.3, 0.3)
+        gltf.scene.position.set(0, -1, -3)
+        gltf.scene.rotation.y = Math.PI * 0.5
+        scene.add(gltf.scene)
+
+        gui.add(gltf.scene.rotation, 'y').min(- Math.PI).max(Math.PI).step(0.001).name('Helmet rotation Y')
+
+        updateAllMaterials()
+    }
+)
+
 /**
  * Lights
  */
 const directionalLight = new THREE.DirectionalLight('#ffffff', 3)
-directionalLight.position.set(0.25, 3, -2.25)
+directionalLight.position.set(-5, 2.5, -0.5)
+directionalLight.castShadow = true
+directionalLight.shadow.camera.far = 15
+directionalLight.shadow.mapSize.set(1024, 1024)
+// Prevent burger or model from casting shadow on itself
+directionalLight.shadow.normalBias = 0.05
 scene.add(directionalLight)
+
+const directionalLightCameraHelper = new THREE.CameraHelper(directionalLight.shadow.camera)
+scene.add(directionalLightCameraHelper)
 
 gui.add(directionalLight, 'intensity').min(0).max(10).step(0.001).name('Light Intensity')
 gui.add(directionalLight.position, 'x').min(-5).max(5).step(0.001).name('Light X')
@@ -128,7 +158,7 @@ window.addEventListener('resize', () =>
  */
 // Base camera
 const camera = new THREE.PerspectiveCamera(75, sizes.width / sizes.height, 0.1, 100)
-camera.position.set(4, 1, - 4)
+camera.position.set(4, 1, -6)
 scene.add(camera)
 
 // Controls
@@ -139,12 +169,44 @@ controls.enableDamping = true
  * Renderer
  */
 const renderer = new THREE.WebGLRenderer({
-    canvas: canvas
+    canvas: canvas,
+    antialias: true
 })
 renderer.setSize(sizes.width, sizes.height)
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
 renderer.physicallyCorrectLights = true
 renderer.outputEncoding = THREE.sRGBEncoding
+/**
+ * Tone mapping
+ * THREE.NoToneMapping (Default)
+ * THREE.LinearToneMapping
+ * THREE.ReinhardToneMapping
+ * THREE.CineonToneMapping
+ * THREE.ACESFilmicToneMapping
+ */
+// console.log('THREE.ACESFilmicToneMapping: ', THREE.ACESFilmicToneMapping)
+renderer.toneMapping = THREE.ACESFilmicToneMapping
+renderer.toneMappingExposure = 3
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
+
+gui.add(renderer, 'toneMapping', {
+    No: THREE.NoToneMapping,
+    Linear: THREE.LinearToneMapping,
+    Reinhard: THREE.ReinhardToneMapping,
+    Cineon: THREE.CineonToneMapping,
+    ACESFilmic: THREE.ACESFilmicToneMapping
+}).onFinishChange(() => {
+    /**
+     * THREE toneMapping are integer values
+     * but when used in a select option it becomes string
+     * that is why we need to hook onFinishChange event to transform the selected
+     * value into an integer.
+     */
+    renderer.toneMapping = Number(renderer.toneMapping)
+    updateAllMaterials()
+})
+gui.add(renderer, 'toneMappingExposure').min(0).max(10).step(0.001)
 
 /**
  * Animate
